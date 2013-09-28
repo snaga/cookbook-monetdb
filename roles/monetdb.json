@@ -1,0 +1,15 @@
+{
+  "name": "monetdb",
+  "default_attributes": {},
+  "override_attributes": {},
+  "json_class": "Chef::Role",
+  "description": "",
+  "chef_type": "role",
+
+  "run_list": [
+    "recipe[monetdb]",
+    "recipe[monetdb::init]",
+    "recipe[monetdb::createdb]"
+  ]
+}
+

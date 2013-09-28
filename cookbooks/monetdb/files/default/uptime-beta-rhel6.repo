@@ -1,0 +1,8 @@
+
+[uptime-beta-repo]
+name=uptime-beta-repo
+baseurl=http://yum-uptime-beta.s3.amazonaws.com/rhel6
+gpgcheck=1
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-uptime-beta
+

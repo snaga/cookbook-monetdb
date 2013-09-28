@@ -1,0 +1,10 @@
+{
+  "monetdb": {
+    "port" : "50000",
+    "dbname" : "voc"
+  },
+
+  "run_list": [
+    "role[monetdb]"
+  ]
+}

@@ -1,0 +1,106 @@
+#!/bin/bash
+#
+# monetdbd          Start up the MonetDB server daemon
+#
+# chkconfig: 2345 55 25
+# description: MonetDB is an open source column-oriented database
+#              management system developed at the CWI in the Netherlands.
+#
+# processname: monetdbd
+# pidfile: /var/lib/monetdb/merovingian.pid
+
+# source function library
+. /etc/rc.d/init.d/functions
+
+# pull in sysconfig settings
+[ -f /etc/sysconfig/monetdbd ] && . /etc/sysconfig/monetdbd
+
+DBFARM=/var/lib/monetdb
+
+RETVAL=0
+prog="monetdbd"
+lockfile=/var/lock/subsys/$prog
+
+# Some functions to make the below more readable
+MONETDBD=/usr/bin/monetdbd
+PID_FILE=/var/lib/monetdb/merovingian.pid
+
+runlevel=$(set -- $(runlevel); eval "echo \$$#" )
+
+start()
+{
+        [ -x $MONETDBD ] || exit 5
+        [ -d $DBFARM ] || exit 7
+
+        echo -n $"Starting $prog: "
+        sudo -u monetdb $MONETDBD start $DBFARM && success || failure
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && touch $lockfile
+        echo
+        return $RETVAL
+}
+
+stop()
+{
+        echo -n $"Stopping $prog: "
+        sudo -u monetdb $MONETDBD stop $DBFARM && success || failure
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && rm -f $lockfile
+        echo
+}
+
+reload()
+{
+        stop
+        start
+}
+
+restart() {
+        stop
+        start
+}
+
+force_reload() {
+        restart
+}
+
+rh_status() {
+        status -p $PID_FILE monetdbd
+}
+
+rh_status_q() {
+        rh_status >/dev/null 2>&1
+}
+
+case "$1" in
+        start)
+                rh_status_q && exit 0
+                start
+                ;;
+        stop)
+                if ! rh_status_q; then
+                        rm -f $lockfile
+                        exit 0
+                fi
+                stop
+                ;;
+        restart)
+                restart
+                ;;
+        reload)
+                rh_status_q || exit 7
+                reload
+                ;;
+        status)
+                rh_status
+                RETVAL=$?
+                if [ $RETVAL -eq 3 -a -f $lockfile ] ; then
+                        RETVAL=2
+                fi
+                ;;
+        *)
+                echo $"Usage: $0 {start|stop|restart|reload|status}"
+                RETVAL=2
+esac
+exit $RETVAL
+
